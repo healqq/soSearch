@@ -18,27 +18,79 @@
 		<script type='text/javascript' src='bower_components/angular-animate/angular-animate.min.js'></script>
 		<script type='text/javascript' src='bower_components/angular-sanitize/angular-sanitize.min.js'></script>
 		<script type='text/javascript' src='bower_components/bootstrap/dist/js/bootstrap.min.js'></script>
+
 	-->
+		<script type="text/javascript" src='app.js'></script>
+		<script type="text/javascript" src='js/pageController.js'></script>
 	</head>
 	<body>
-		<script>
+	<!--	<script>
 		  window.fbAsyncInit = function() {
 		    FB.init({
 		      appId      : '358499864349109',
 		      xfbml      : true,
-		      version    : 'v2.3'
+		      version    : 'v2.0'
 		    });
+		    var rootScope = angular.element('body').scope().$root;
+	 		rootScope.$broadcast('FB-init-ready', {});
 		  };
 
 		  (function(d, s, id){
 		     var js, fjs = d.getElementsByTagName(s)[0];
 		     if (d.getElementById(id)) {return;}
 		     js = d.createElement(s); js.id = id;
-		     js.src = "//connect.facebook.net/en_US/sdk.js";
+		     js.src = "//connect.facebook.net/en_US/sdk/debug.js";
 		     fjs.parentNode.insertBefore(js, fjs);
 		   }(document, 'script', 'facebook-jssdk'));
 		</script>
+		-->
+		<script>window.twttr = (function(d, s, id) {
+			  var js, fjs = d.getElementsByTagName(s)[0],
+			    t = window.twttr || {};
+			  if (d.getElementById(id)) return t;
+			  js = d.createElement(s);
+			  js.id = id;
+			  js.src = "https://platform.twitter.com/widgets.js";
+			  fjs.parentNode.insertBefore(js, fjs);
+			 
+			  t._e = [];
+			  t.ready = function(f) {
+			    t._e.push(f);
+			  };
+			 
+			  return t;
+			}(document, "script", "twitter-wjs"));
+		</script>
 		<div class='container' ng-controller='pageController as pageCtrl'>
-			{{pageCtrl.message}}
+			<div class='row'>
+				<div class='col-md-6'>
+					<div class="input-group">
+				      	<input type="text" class="form-control" placeholder="keywords" ng-model='pageCtrl.searchString'>
+					      <span class="input-group-btn">
+					        	<button class="btn btn-default" type="button" ng-click='pageCtrl.search()'>search</button>
+					      </span>
+				    </div>
+				</div>
+				<div class='col-md-6'>
+					<table class='table table-stripped'>
+						<tr>
+							<td>#</td>
+							<td>combinations</td>
+						</tr>
+						<tr ng-repeat='item in pageCtrl.transpositions |orderBy: "depth" track by $id($index)'>
+							<td>
+								{{$index}}
+							</td>
+							<td>
+								{{item.value}}
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+
+			<!-- {{pageCtrl.message}} -->
+			
 		</div>
+		
 	</body>
