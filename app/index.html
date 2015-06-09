@@ -88,6 +88,24 @@
 					</table>
 				</div>
 			</div>
+			<div class='row'>
+				<div class='col-md-10 col-md-offset-1'>
+					<table class='table table-stripped'>
+						<tr>
+							<td>#</td>
+							<td>text</td>
+						</tr>
+						<tr ng-repeat='item in pageCtrl.response'>
+							<td>
+								{{$index}}
+							</td>
+							<td>
+								{{item.text}}
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
 
 			<!-- {{pageCtrl.message}} -->
 			

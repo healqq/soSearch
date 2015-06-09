@@ -6,8 +6,9 @@
 	.module('app')
 	.controller('pageController', pageController);
 
-	pageController.$inject = ['$scope'];
-	function pageController($scope){
+
+	pageController.$inject = ['$scope', '$http'];
+	function pageController($scope, $http){
 		var testString = "a, bbb, c 124";
 
 		var vm = this;
@@ -17,6 +18,8 @@
 
 		function search(){
 			vm.transpositions = createTranspositionsArray(vm.searchString);
+
+			sendTwitterRequest(joinTranspositions(vm.transpositions));
 			// $scope.$apply();
 
 		}
@@ -37,8 +40,25 @@
 		})
 		// $(document).ready(function(){
 		
+		function sendTwitterRequest(q){
+			$http.get('backend/twitterSearch.php',
+				{
+					params:{q:q}
+				}
+			)
+			.success(function(data){
+				vm.response = data.statuses;
+			})
+		}
 		
-		// });
+	}
+	function joinTranspositions(transpositions){
+		var result  = '"' + transpositions[0].value + '"';
+		for ( var i =1; i < 2; i++){
+			result += ' OR "' + transpositions[i].value + '"';
+		}
+		return result;
+
 	}
 	/*
 		creates array of transpositions
@@ -67,7 +87,6 @@
 			}
 		}
 		return result;
-
-
 	}
+
 })();
