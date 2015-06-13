@@ -23,7 +23,8 @@ $bearer_token = $reply->access_token;
 $q = $_GET['q'];
 $reply = $cb->search_tweets(
 	[
-		'q' => $q
+		'q' => $q." -filter:retweets",
+		'count' => 100
 	]
 	, true
 );

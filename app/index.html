@@ -13,6 +13,7 @@
 		
 		<script type='text/javascript' src='bower_components/jquery/dist/jquery.min.js'></script>
 		<script type='text/javascript' src='bower_components/angularjs/angular.js'></script>
+		<script type='text/javascript' src='bower_components/moment/moment.js'></script>
 	<!--	<script type='text/javascript' src='bower_components/angular-route/angular-route.min.js'></script>
 		<script type='text/javascript' src='bower_components/angular-resource/angular-resource.min.js'></script>
 		<script type='text/javascript' src='bower_components/angular-animate/angular-animate.min.js'></script>
@@ -44,68 +45,158 @@
 		   }(document, 'script', 'facebook-jssdk'));
 		</script>
 		-->
-		<script>window.twttr = (function(d, s, id) {
-			  var js, fjs = d.getElementsByTagName(s)[0],
-			    t = window.twttr || {};
-			  if (d.getElementById(id)) return t;
-			  js = d.createElement(s);
-			  js.id = id;
-			  js.src = "https://platform.twitter.com/widgets.js";
-			  fjs.parentNode.insertBefore(js, fjs);
-			 
-			  t._e = [];
-			  t.ready = function(f) {
-			    t._e.push(f);
-			  };
-			 
-			  return t;
-			}(document, "script", "twitter-wjs"));
+		
 		</script>
 		<div class='container' ng-controller='pageController as pageCtrl'>
+			<div class="page-header">
+			  <h1>SOsearch <small>social searcher</small></h1>
+			</div>
 			<div class='row'>
-				<div class='col-md-6'>
+				<div class='col-md-5 col-md-offset-1'>
 					<div class="input-group">
-				      	<input type="text" class="form-control" placeholder="keywords" ng-model='pageCtrl.searchString'>
+				      	<input type="text" class="form-control" placeholder="keywords" 
+				      	ng-model='pageCtrl.searchString'>
 					      <span class="input-group-btn">
-					        	<button class="btn btn-default" type="button" ng-click='pageCtrl.search()'>search</button>
+					        	<button class="btn btn-primary" type="button" ng-click='pageCtrl.search()'>search</button>
 					      </span>
 				    </div>
 				</div>
-				<div class='col-md-6'>
-					<table class='table table-stripped'>
+				<div class='col-md-5'>
+					<h5> results: {{pageCtrl.response.length}} </h5>
+					<table class='table table-striped'>
 						<tr>
 							<td>#</td>
 							<td>combinations</td>
 						</tr>
-						<tr ng-repeat='item in pageCtrl.transpositions |orderBy: "depth" track by $id($index)'>
+						<tr 
+						ng-repeat='item in pageCtrl.transpositions track by $id($index)'
+						ng-class='{success: pageCtrl.partLoaded(item.index),
+									warning: pageCtrl.partLoading(item.index)}'>
 							<td>
-								{{$index}}
+								{{item.index}}
 							</td>
 							<td>
-								{{item.value}}
+								{{item.value.join(',')}}
 							</td>
 						</tr>
 					</table>
 				</div>
 			</div>
-			<div class='row'>
+			<div class='row' ng-show='pageCtrl.response.length > 0'>
 				<div class='col-md-10 col-md-offset-1'>
-					<table class='table table-stripped'>
+					<nav>
+						<ul class='pagination'>
+							<li>
+								<a 
+									href='javascript::'
+									aria-label="Previous"
+									ng-click='pageCtrl.setCurrentPage(pageCtrl.currentPage - 1)'>
+							    	<span aria-hidden="true">&laquo;</span>
+							    </a>
+							</li>
+							<li>
+							 <a
+								href='javascript::'
+								ng-repeat='pageIndex in pageCtrl.pagesList'
+								ng-click ='pageCtrl.setCurrentPage(pageIndex)'
+								
+								>
+									<span>	
+										{{pageIndex}}
+									</span>
+								</a>
+							</li>
+							<li>
+						      	<a 
+						      		
+						      	 	aria-label="Next"
+						      	 	ng-click='pageCtrl.setCurrentPage(pageCtrl.currentPage + 1)'>
+						        	<span aria-hidden="true">&raquo;</span>
+						      	</a>
+						    </li>
+						</ul>
+					</nav>
+					<table class='table table-striped'>
 						<tr>
 							<td>#</td>
+							<td>date</td>
 							<td>text</td>
 						</tr>
-						<tr ng-repeat='item in pageCtrl.response'>
+						<tr 
+						ng-repeat='item in pageCtrl.response | limitTo:pageCtrl.itemsPerPage:(pageCtrl.currentPage-1)*pageCtrl.itemsPerPage'>
 							<td>
-								{{$index}}
+								{{1 + $index + (pageCtrl.currentPage - 1) * pageCtrl.itemsPerPage}}
+							</td>
+							<td>
+								{{item.created_at}}
 							</td>
 							<td>
 								{{item.text}}
 							</td>
 						</tr>
 					</table>
+					<nav>
+						<ul class='pagination'>
+							<li>
+								<a 
+									href='javascript::'
+									aria-label="Previous"
+									ng-click='pageCtrl.setCurrentPage(pageCtrl.currentPage - 1)'>
+							    	<span aria-hidden="true">&laquo;</span>
+							    </a>
+							</li>
+							<li>
+							 <a
+								href='javascript::'
+								ng-repeat='pageIndex in pageCtrl.pagesList'
+								ng-click ='pageCtrl.setCurrentPage(pageIndex)'
+								
+								>
+									<span>	
+										{{pageIndex}}
+									</span>
+								</a>
+							</li>
+							<li>
+						      	<a 
+						      		
+						      	 	aria-label="Next"
+						      	 	ng-click='pageCtrl.setCurrentPage(pageCtrl.currentPage + 1)'>
+						        	<span aria-hidden="true">&raquo;</span>
+						      	</a>
+						    </li>
+						</ul>
+					</nav>
 				</div>
 			</div>
+			<!-- <div class='row'>
+				<div class='col-md-10 col-md-offset-1'>
+					<nav>
+						<ul class='pagination'>
+							<li ng-repeat='pageIndex in [0,1,2,3,4,5]'>
+								<table class='table table-striped'>
+									<!-- <tr>
+										<td>#</td>
+										<td>date</td>
+										<td>text</td>
+									</tr>
+									<!-- <tr ng-repeat='item in pageCtrl.response | limitTo:20:(pageIndex * 20)'>
+										<td>
+											{{$index}}
+										</td>
+										<td>
+											{{item.created_at}}
+										</td>
+										<td>
+											{{item.text}}
+										</td>
+									</tr>
+								</table>
+							</li>
+						</ul>
+					</nav>
+				</div>
+			</div> --> 
 
 			<!-- {{pageCtrl.message}} -->
 			
