@@ -1,40 +1,37 @@
 module.exports = function (grunt) {
 
-	grunt.loadNpmTasks('grunt-contrib-sass');
-	grunt.loadNpmTasks('grunt-contrib-watch');
-	
+  grunt.loadNpmTasks('grunt-contrib-sass');
+  grunt.loadNpmTasks('grunt-contrib-watch');
+ 
+  grunt.initConfig({
+    pkg: grunt.file.readJSON('package.json'),
 
-	grunt.initConfig({
-		pkg: grunt.file.readJSON('package.json'),
-
-		sass:{
-			dist:{
-				options:{
-					style: 'expanded'
-				},
-				files:{
-					'app/css/style.css' : 'scss/style.scss',
-					
-
-				}
-			}
-		},
-		watch: {
-		  css: {
-		    	files: ['scss/*.scss'],
-		    	tasks: ['sass'],
-		    	options: {
-		      		livereload: false
-		    	}
-		  	}
-		}
-	
+    sass:{
+      dist:{
+        options:{
+          style: 'expanded'
+        },
+        files:{
+          'app/css/style.css' : 'scss/style.scss',
+          
+        }
+      }
+    },
+    watch: {
+      css: {
+          files: ['scss/*.scss'],
+          tasks: ['sass'],
+          options: {
+              livereload: true
+          }
+        }
+    }
+   
 
 
+  });
 
-	});
+  grunt.registerTask('default', ['sass']);
+ 
 
-	grunt.registerTask('default', ['sass']);
-	// grunt.registerTask('docs', ['ngdocs:map', 'ngdocs:places']);
-
-}	
+} 

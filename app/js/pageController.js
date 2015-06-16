@@ -35,12 +35,19 @@
 			//emptying data
 			vm.response = [];
 			vm.twitterParts = [];
+			vm.vkParts = [];
+
 			fillTwitterResponseParts(length);
+			fillVkResponseParts(length);
 			
 			
+
 			if (length == 0) {
 				return;
 			}
+			//loading vk
+			sendVkRequest(vm.transpositions[0], 0);
+			//loading twitter
 			while (loop){
 				part = getPartIndex(start) ;
 				sendTwitterRequest(
@@ -71,7 +78,7 @@
 				}
 			})
 		})
-		// $(document).ready(function(){
+		
 		/*
 			UI
 		*/
@@ -80,6 +87,16 @@
 		}
 		function partLoading(index){
 			return vm.twitterParts[getPartIndex(index)].status == "loading";
+		}
+		function setCurrentPage(value){
+			// $scope.$apply()
+			var _value = Math.min(Math.max(value, 1), vm.pagesCount);
+			vm.currentPage = _value;
+		}
+		function recalculatePages(){
+			vm.pagesCount = Math.floor(vm.response.length/ vm.itemsPerPage) 
+					+ ( (vm.response.length % vm.itemsPerPage == 0) ? 0:1);
+			vm.pagesList = createPagesArray(vm.pagesCount);
 		}
 		// function getResultsPage(){
 		// 	vm.pageIndex = 0;
@@ -101,11 +118,11 @@
 		/*
 			UI END
 		*/
-		function setCurrentPage(value){
-			// $scope.$apply()
-			var _value = Math.min(Math.max(value, 1), vm.pagesCount);
-			vm.currentPage = _value;
-		}
+		
+		/*
+			requesting START
+		*/
+		/*TWITTER+*/
 		function sendTwitterRequest(q, part){
 			var _part = part;
 			$http.get('backend/twitterSearch.php',
@@ -114,10 +131,8 @@
 				}
 			)
 			.success(function(data){
-				addItemsToResponse(data.statuses);
-				vm.pagesCount = Math.floor(vm.response.length/ vm.itemsPerPage) 
-					+ ( (vm.response.length % vm.itemsPerPage == 0) ? 0:1);
-				vm.pagesList = createPagesArray(vm.pagesCount);
+				addTwitterItemsToResponse(data.statuses);
+				recalculatePages();
 				vm.twitterParts[_part].status = 'loaded';
 				// vm.response = vm.response.concat(data.statuses);
 			})
@@ -129,8 +144,9 @@
 				vm.twitterParts.push({status:'idle'});
 			}
 		}
-		function addItemsToResponse(array){
+		function addTwitterItemsToResponse(array){
 			for ( var i=0; i < array.length; i++){
+				array[i].response_type='twitter';
 				array[i].created_at = moment(
 					array[i].created_at, 
 					"ddd MMM dd HH:mm:ss zzzz yyyy" 
@@ -140,7 +156,61 @@
 				// vm.pages = getResultsPage();
 			}
 		}
+		/*TWITTER-*/
+		/*VK+*/
+		function sendVkRequest(q, index){
+			var _index = index;
+						
+			$http.get('backend/vkSearch.php',
+				{
+					params:{
+						q:q,
+					}
+				}
+			).success(function(data){
+				//console.log(data);
+				//adding items
+				// console.log(data);
+				addVkItemsToResponse(data.response);
+				recalculatePages();
+				vm.vkParts[_index].status = 'loaded';
+				//calling next search
+				_index++;
+				if (vm.transpositions.length > _index)
+				sendVkRequest(vm.transpositions[_index], _index);
 
+			})
+
+		}
+		function addVkItemsToResponse(array){
+			//console.log(array);
+			//starting from 1, cuz array[0] = num of items
+			for ( var i=1; i < array.length; i++){
+				//skip nontext nodes
+				if (array[i].text == ""){
+					continue;
+				}
+				array[i].response_type='vk';
+				array[i].created_at = moment(
+					array[i].date, 
+					"X" 
+				).format('DD MMM YYYY');  ;
+				// console.log(array[i].created_at);
+				vm.response.push(array[i]);
+				// vm.pages = getResultsPage();
+			}
+		}
+		function fillVkResponseParts(length){
+			vm.vkParts = [];
+			
+			for ( var i = 0; i < length; i++){
+				vm.vkParts.push({status:'idle'});
+			}
+		}
+		/*VK-*/
+		/*
+			requesting END
+		*/
 
 		
 

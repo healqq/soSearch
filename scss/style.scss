@@ -1,3 +1,23 @@
+$color-facebook: #3b5998;
+$color-instagram: #bf8360;
+$color-twitter: #0084B4;
+$color-vk: #597da3;
+$color-youtube: #cc181e;
 body{
 	height: 100%;
 }
+.result{
+	.result-table{
+		
+		.date{
+			width: 100px;
+		}
+		.twitter{
+			border-left: 5px solid $color-twitter;
+		}
+		.vk{
+			border-left: 5px solid $color-vk;
+		}
+
+	}
+} 

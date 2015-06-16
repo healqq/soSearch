@@ -2,4 +2,14 @@ body {
   height: 100%;
 }
 
+.result .result-table .date {
+  width: 100px;
+}
+.result .result-table .twitter {
+  border-left: 5px solid #0084B4;
+}
+.result .result-table .vk {
+  border-left: 5px solid #597da3;
+}
+
 /*# sourceMappingURL=style.css.map */
