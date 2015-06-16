@@ -46,7 +46,7 @@
 				return;
 			}
 			//loading vk
-			sendVkRequest(vm.transpositions[0], 0);
+			sendVkRequest(vm.transpositions[0].value, 0);
 			//loading twitter
 			while (loop){
 				part = getPartIndex(start) ;
@@ -177,7 +177,7 @@
 				//calling next search
 				_index++;
 				if (vm.transpositions.length > _index)
-				sendVkRequest(vm.transpositions[_index], _index);
+				sendVkRequest(vm.transpositions[_index].value, _index);
 
 			})
 
@@ -234,7 +234,7 @@
 		var result  = joinArray(transpositions[start].value, ' ');
 		var length = Math.min(transpositions.length , 4 + start);
 		for ( var i = start + 1; i < length; i++){
-			console.log(i + " " + transpositions[i]);
+			//console.log(i + " " + transpositions[i]);
 			result += ' OR ' + joinArray(transpositions[i].value, ' ')  ;
 		}
 		return result;

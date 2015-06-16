@@ -19,8 +19,10 @@ function sendRequest($q)
 	$reply = $client->get(
 		$url.$method,
 		[
-			'q' => $q,
-			'count' => 200
+			'query' => [
+				'q' => $q,
+				'count' => 200
+			],
 		]
 	
 	);
