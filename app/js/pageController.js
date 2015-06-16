@@ -13,7 +13,7 @@
 
 		
 		var vm = this;
-		vm.itemsPerPage = 20;
+		vm.itemsPerPage = 100;
 		vm.searchString = '';
 		vm.search = search;
 		vm.response = [];
