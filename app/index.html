@@ -53,33 +53,53 @@
 			</div>
 			<div class='row'>
 				<div class='col-md-5 col-md-offset-1'>
-					<div class="input-group">
-				      	<input type="text" class="form-control" placeholder="keywords" 
-				      	ng-model='pageCtrl.searchString'>
-					      <span class="input-group-btn">
-					        	<button class="btn btn-primary" type="button" ng-click='pageCtrl.search()'>search</button>
-					      </span>
-				    </div>
+					<div class='row'>
+						
+						<div class="input-group">
+					      	<input type="text" class="form-control" placeholder="keywords" 
+					      	ng-model='pageCtrl.searchString'>
+						      <span class="input-group-btn">
+						        	<button class="btn btn-primary" type="button" ng-click='pageCtrl.combine()'>combine</button>
+						      </span>
+					    </div>
+					</div>
+
+
 				</div>
-				<div class='col-md-5'>
-					<h5> results: {{pageCtrl.response.length}} </h5>
-					<table class='table table-striped'>
-						<tr>
-							<td>#</td>
-							<td>combinations</td>
-						</tr>
-						<tr 
-						ng-repeat='item in pageCtrl.transpositions track by $id($index)'
-						ng-class='{success: pageCtrl.partLoaded(item.index),
-									warning: pageCtrl.partLoading(item.index)}'>
-							<td>
-								{{item.index + 1}}
-							</td>
-							<td>
-								{{item.value.join(',')}}
-							</td>
-						</tr>
-					</table>
+
+				<div class='col-md-6'>
+					<div class='row'>
+						<div class='col-md-10'>
+							
+							<table class='table table-striped'>
+								<tr>
+									<td>#</td>
+									<td>combination</td>
+									<td>selected</td>
+								</tr>
+								<tr 
+								ng-repeat='item in pageCtrl.transpositions track by $id($index)'
+								ng-class='{success: pageCtrl.partLoaded(item.index),
+											warning: pageCtrl.partLoading(item.index)}'>
+									<td>
+										{{item.index + 1}}
+									</td>
+									<td>
+										{{item.value.join(',')}}
+									</td>
+									<td>
+										<input type='checkbox' ng-model='item.selected'>
+									</td>
+								</tr>
+							</table>
+							<h5> results: {{pageCtrl.response.length}} </h5>
+						</div>
+					</div>
+					<div class='row'>
+						<div class='col-md-10'>
+					   		<button class="btn btn-primary" type="button" ng-click='pageCtrl.search()'>search</button>
+					   	</div>
+					</div>
 				</div>
 			</div>
 			<div class='row result' ng-show='pageCtrl.response.length > 0'>
