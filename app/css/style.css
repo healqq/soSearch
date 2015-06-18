@@ -12,4 +12,8 @@ body {
   border-left: 5px solid #597da3;
 }
 
+.transpositions .item {
+  cursor: pointer;
+}
+
 /*# sourceMappingURL=style.css.map */

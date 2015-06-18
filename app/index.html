@@ -63,24 +63,23 @@
 						      </span>
 					    </div>
 					</div>
-
-
 				</div>
-
 				<div class='col-md-6'>
 					<div class='row'>
 						<div class='col-md-10'>
 							
-							<table class='table table-striped'>
+							<table class='table table-striped transpositions'>
 								<tr>
 									<td>#</td>
 									<td>combination</td>
 									<td>selected</td>
 								</tr>
 								<tr 
+								class='item'
 								ng-repeat='item in pageCtrl.transpositions track by $id($index)'
-								ng-class='{success: pageCtrl.partLoaded(item.index),
-											warning: pageCtrl.partLoading(item.index)}'>
+								ng-class='{success: pageCtrl.partLoaded(item.index) ,
+											warning: pageCtrl.partLoading(item.index)}'
+								ng-click='pageCtrl.toggleSelection($index)'>
 									<td>
 										{{item.index + 1}}
 									</td>
@@ -142,6 +141,9 @@
 							<td>source</td>
 							<td class='date'>date</td>
 							<td>text</td>
+							<td>likes</td>
+							<td>reposts</td>
+							<td>comments</td>
 						</tr>
 						<tr 
 						ng-repeat='item in pageCtrl.response | limitTo:pageCtrl.itemsPerPage:(pageCtrl.currentPage-1)*pageCtrl.itemsPerPage'
@@ -159,6 +161,15 @@
 							</td>
 							<td>
 								{{item.text}}
+							</td>
+							<td>
+								{{item.likes}}
+							</td>
+							<td>
+								{{item.reposts}}
+							</td>
+							<td>
+								{{item.comments}}
 							</td>
 						</tr>
 					</table>
@@ -230,3 +241,4 @@
 		</div>
 		
 	</body>
+</html>

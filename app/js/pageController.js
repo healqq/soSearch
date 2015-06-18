@@ -21,6 +21,7 @@
 		vm.twitterParts = [];
 		vm.partLoaded = partLoaded;
 		vm.partLoading = partLoading;
+		vm.toggleSelection = toggleSelection;
 		// vm.getResultsPage = getResultsPage;
 		vm.currentPage = 1;
 		vm.pagesCount = 0;
@@ -28,13 +29,18 @@
 		
 		function combine(){
 			vm.transpositions = createTranspositionsArray(vm.searchString);
+			var length = vm.transpositions.length;
+			fillTwitterResponseParts(length);
+			fillVkResponseParts(length);
+			
 		}
 		function search(){
 			var start = 0;
 			var loop = true;
 			var part = 0;
-			// vm.transpositions = createTranspositionsArray(vm.searchString);
 			var length = vm.transpositions.length;
+			// vm.transpositions = createTranspositionsArray(vm.searchString);
+			
 			//emptying data
 			vm.response = [];
 			vm.twitterParts = [];
@@ -42,6 +48,7 @@
 
 			fillTwitterResponseParts(length);
 			fillVkResponseParts(length);
+
 			
 			
 
@@ -57,7 +64,7 @@
 					joinTranspositions(vm.transpositions, start), 
 					part
 				);
-				vm.twitterParts[part].status = 'loading';
+				
 				start +=4;
 				if ( start > length){
 					loop = false;
@@ -86,10 +93,10 @@
 			UI
 		*/
 		function partLoaded(index){
-			return vm.twitterParts[getPartIndex(index)].status == "loaded";
+			return (vm.twitterParts[getPartIndex(index)].status == "loaded") && ( vm.vkParts[index].status == "loaded");
 		}
 		function partLoading(index){
-			return vm.twitterParts[getPartIndex(index)].status == "loading";
+			return (vm.twitterParts[getPartIndex(index)].status == "loading") && ( vm.vkParts[index].status == "loading");
 		}
 		function setCurrentPage(value){
 			// $scope.$apply()
@@ -100,6 +107,9 @@
 			vm.pagesCount = Math.floor(vm.response.length/ vm.itemsPerPage) 
 					+ ( (vm.response.length % vm.itemsPerPage == 0) ? 0:1);
 			vm.pagesList = createPagesArray(vm.pagesCount);
+		}
+		function toggleSelection(index){
+			vm.transpositions[index].selected = ! vm.transpositions[index].selected;
 		}
 		// function getResultsPage(){
 		// 	vm.pageIndex = 0;
@@ -127,19 +137,26 @@
 		*/
 		/*TWITTER+*/
 		function sendTwitterRequest(q, part){
+
 			var _part = part;
-			$http.get('backend/twitterSearch.php',
-				{
-					params:{q:q}
-				}
-			)
-			.success(function(data){
-				addTwitterItemsToResponse(data.statuses);
-				recalculatePages();
-				console.log(vm.twitterParts);
+			if (q !== null){
+				vm.twitterParts[part].status = 'loading';
+				$http.get('backend/twitterSearch.php',
+					{
+						params:{q:q}
+					}
+				)
+				.success(function(data){
+					addTwitterItemsToResponse(data.statuses);
+					recalculatePages();
+					// console.log(vm.twitterParts);
+					vm.twitterParts[_part].status = 'loaded';
+					// vm.response = vm.response.concat(data.statuses);
+				})
+			}
+			else{
 				vm.twitterParts[_part].status = 'loaded';
-				// vm.response = vm.response.concat(data.statuses);
-			})
+			}
 		}
 		function fillTwitterResponseParts(length){
 			vm.twitterParts = [];
@@ -147,18 +164,27 @@
 			for ( var i = 0; i < parts + 1; i++){
 				vm.twitterParts.push({status:'idle'});
 			}
-			console.log(vm.twitterParts);
+			// console.log(vm.twitterParts);
 		}
 		function addTwitterItemsToResponse(array){
-			for ( var i=0; i < array.length; i++){
-				array[i].response_type='twitter';
-				array[i].created_at = moment(
+			function Item(data){
+
+				var item = {};
+				item.created_at = moment(
 					array[i].created_at, 
 					"ddd MMM dd HH:mm:ss zzzz yyyy" 
-				).format('DD MMM YYYY');  ;
-				// console.log(array[i].created_at);
-				vm.response.push(array[i]);
-				// vm.pages = getResultsPage();
+				).format('DD MMM YYYY');  
+				item.response_type = 'twitter';
+				item.text = data.text;
+				item.likes = data.favorites_count;
+				item.reposts = data.retweet_count;
+				item.comments = 0;
+				return item;
+			}
+			for ( var i=0; i < array.length; i++){
+						
+				vm.response.push( new Item(array[i]) );
+				
 			}
 		}
 		/*TWITTER-*/
@@ -169,7 +195,7 @@
 				$http.get('backend/vkSearch.php',
 					{
 						params:{
-							q:q,
+							q: joinArray(transposition.value, ' ')
 						}
 					}
 				).success(function(data){
@@ -194,21 +220,28 @@
 
 		}
 		function addVkItemsToResponse(array){
-			//console.log(array);
-			//starting from 1, cuz array[0] = num of items
+			
+			function Item(data){
+
+				var item = {};
+				item.created_at = moment(
+					data.date, 
+					"X" 
+				).format('DD MMM YYYY');
+				item.response_type = 'vk';
+				item.text = data.text;
+				item.likes = data.likes.count;
+				item.reposts = data.reposts.count;
+				item.comments = data.comments.count;
+				return item;
+			}
 			for ( var i=1; i < array.length; i++){
 				//skip nontext nodes
 				if (array[i].text == ""){
 					continue;
 				}
-				array[i].response_type='vk';
-				array[i].created_at = moment(
-					array[i].date, 
-					"X" 
-				).format('DD MMM YYYY');  ;
-				// console.log(array[i].created_at);
-				vm.response.push(array[i]);
-				// vm.pages = getResultsPage();
+			
+				vm.response.push( new Item(array[i]) );
 			}
 		}
 		function fillVkResponseParts(length){
@@ -242,11 +275,18 @@
 		return value.join(separator)
 	}
 	function joinTranspositions(transpositions, start){
-		var result  = joinArray(transpositions[start].value, ' ');
-		var length = Math.min(transpositions.length , 4 + start);
-		for ( var i = start + 1; i < length; i++){
+		var arrayPart = transpositions.slice().splice(start, 4);
+		var selectedItems = $.grep(arrayPart, function(el){
+			return el.selected;
+		});
+		if (selectedItems.length == 0) {
+			return null;
+		}
+		var result  = joinArray(selectedItems[0].value, ' ');
+		// var length = Math.min(transpositions.length , 4 + start);
+		for ( var i = 1; i < selectedItems.length; i++){
 			//console.log(i + " " + transpositions[i]);
-			result += ' OR ' + joinArray(transpositions[i].value, ' ')  ;
+			result += ' OR ' + joinArray(selectedItems[i].value, ' ')  ;
 		}
 		return result;
 
