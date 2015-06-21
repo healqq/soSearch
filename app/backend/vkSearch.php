@@ -6,11 +6,18 @@ require_once ('../../vendor/autoload.php');
 	requesting
 */
 $q = $_GET['q'];
+if ( isset($_GET['offset']) ) {
+	$offset = $_GET['offset'];
+}
+else{
+	$offset = 0;
+}
+
 // echo $q;
-$reply = sendRequest($q);
+$reply = sendRequest($q, $offset);
 echo $reply;
 
-function sendRequest($q)
+function sendRequest($q, $offset)
 {
 	$url = 'https://api.vk.com/method/';
 	$method = 'newsfeed.search';
@@ -21,7 +28,8 @@ function sendRequest($q)
 		[
 			'query' => [
 				'q' => $q,
-				'count' => 200
+				'count' => 200,
+				'offset' => $offset
 			],
 		]
 	

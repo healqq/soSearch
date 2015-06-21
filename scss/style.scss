@@ -26,3 +26,19 @@ body{
 		cursor: pointer;
 	}
 }
+.engine{
+	//padding:	20px;
+	.checkbox{
+		margin-top: 10px;
+		margin-right: 10px;
+		margin-bottom: 10px;
+		font-size: 14pt;
+	}
+}
+.pagination{
+	a{
+		&.active{
+			background-color: #f0f0f0;
+		}
+	}
+}

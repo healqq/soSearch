@@ -7,12 +7,13 @@
 	.controller('pageController', pageController);
 
 
-	pageController.$inject = ['$scope', '$http'];
-	function pageController($scope, $http){
+	pageController.$inject = ['$scope', '$http', '$filter'];
+	function pageController($scope, $http, $filter){
 		// var testString = "a, bbb, c 124";
 
 		
 		var vm = this;
+
 		vm.itemsPerPage = 100;
 		vm.searchString = '';
 		vm.search = search;
@@ -26,6 +27,10 @@
 		vm.currentPage = 1;
 		vm.pagesCount = 0;
 		vm.setCurrentPage = setCurrentPage;
+		vm.engine = {
+			twitter: true,
+			vk: true
+		}
 		
 		function combine(){
 			vm.transpositions = createTranspositionsArray(vm.searchString);
@@ -56,18 +61,22 @@
 				return;
 			}
 			//loading vk
-			sendVkRequest(vm.transpositions[0], 0);
+			if ( vm.engine.vk) {
+				sendVkRequest(vm.transpositions[0], 0, 0);
+			}
 			//loading twitter
-			while (loop){
-				part = getPartIndex(start) ;
-				sendTwitterRequest(
-					joinTranspositions(vm.transpositions, start), 
-					part
-				);
-				
-				start +=4;
-				if ( start > length){
-					loop = false;
+			if ( vm.engine.twitter) {
+				while (loop){
+					part = getPartIndex(start) ;
+					sendTwitterRequest(
+						joinTranspositions(vm.transpositions, start), 
+						part
+					);
+					
+					start +=4;
+					if ( start > length){
+						loop = false;
+					}
 				}
 			}
 			// $scope.$apply();
@@ -93,7 +102,8 @@
 			UI
 		*/
 		function partLoaded(index){
-			return (vm.twitterParts[getPartIndex(index)].status == "loaded") && ( vm.vkParts[index].status == "loaded");
+			return ( (vm.twitterParts[getPartIndex(index)].status == "loaded") || (!vm.engine.twitter) ) 
+				&& ( ( vm.vkParts[index].status == "loaded") || (!vm.engine.vk) );
 		}
 		function partLoading(index){
 			return (vm.twitterParts[getPartIndex(index)].status == "loading") && ( vm.vkParts[index].status == "loading");
@@ -107,7 +117,7 @@
 			vm.pagesCount = Math.floor(vm.response.length/ vm.itemsPerPage) 
 					+ ( (vm.response.length % vm.itemsPerPage == 0) ? 0:1);
 			vm.pagesList = createPagesArray(vm.pagesCount);
-			vm.response = $filter('orderBy')(vm.response, 'likes', false);
+			vm.response = $filter('orderBy')(vm.response, 'summ', true);
 		}
 		function toggleSelection(index){
 			vm.transpositions[index].selected = ! vm.transpositions[index].selected;
@@ -177,8 +187,9 @@
 				).format('DD MMM YYYY');  
 				item.response_type = 'twitter';
 				item.text = data.text;
-				item.likes = data.favorites_count;
+				item.likes = data.favorite_count;
 				item.reposts = data.retweet_count;
+				item.summ = data.retweet_count + data.favorite_count;
 				item.comments = 0;
 				return item;
 			}
@@ -190,33 +201,46 @@
 		}
 		/*TWITTER-*/
 		/*VK+*/
-		function sendVkRequest(transposition, index){
+		function sendVkRequest(transposition, index, offset){
 			var _index = index;
+			var _offset = offset;
 			if ( transposition.selected) {		
 				$http.get('backend/vkSearch.php',
 					{
 						params:{
-							q: joinArray(transposition.value, ' ')
+							q: joinArray(transposition.value, ' '),
+							offset: _offset
 						}
 					}
 				).success(function(data){
 					//console.log(data);
 					//adding items
 					// console.log(data);
+					var count = data.response[0];
 					addVkItemsToResponse(data.response);
-					recalculatePages();
-					vm.vkParts[_index].status = 'loaded';
+					
 					//calling next search
+					_offset += 200;
+					if ( _offset < count){
+						sendVkRequest(vm.transpositions[_index], _index, _offset);
+						return;
+					}
+
+					vm.vkParts[_index].status = 'loaded';
 					_index++;
-					if (vm.transpositions.length > _index)
-					sendVkRequest(vm.transpositions[_index], _index);
+					if (vm.transpositions.length > _index){
+						sendVkRequest(vm.transpositions[_index], _index, 0);
+					}
+					else{
+						recalculatePages();
+					}
 
 				})
 			}
 			else{
 				_index++;
 				if (vm.transpositions.length > _index)
-					sendVkRequest(vm.transpositions[_index], _index);
+					sendVkRequest(vm.transpositions[_index], _index, 0);
 			}
 
 		}
@@ -234,11 +258,12 @@
 				item.likes = data.likes.count;
 				item.reposts = data.reposts.count;
 				item.comments = data.comments.count;
+				item.summ = data.likes.count + data.reposts.count;
 				return item;
 			}
 			for ( var i=1; i < array.length; i++){
 				//skip nontext nodes
-				if (array[i].text == ""){
+				if ((array[i].text == "") || (array[i].text.length > 250) ){
 					continue;
 				}
 			

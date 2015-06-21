@@ -96,7 +96,27 @@
 					</div>
 					<div class='row'>
 						<div class='col-md-10'>
-					   		<button class="btn btn-primary" type="button" ng-click='pageCtrl.search()'>search</button>
+							<div class='row engine'>
+
+								<div class='form-inline col-md-10'>
+									<h3>search in:</h3>
+									<div class="checkbox">
+									    <label>
+									      <input type="checkbox" ng-model='pageCtrl.engine.vk'> vk
+									    </label>
+								  	</div>
+								  	<div class="checkbox">
+									    <label>
+									      <input type="checkbox" ng-model='pageCtrl.engine.twitter'> twitter
+									    </label>
+								  	</div>
+								</div>
+							</div>
+							<div class='row'>
+								<div class='col-md-10'>
+					   				<button class="btn btn-primary" type="button" ng-click='pageCtrl.search()'>search</button>
+					   			</div>
+					   		</div>
 					   	</div>
 					</div>
 				</div>
@@ -118,6 +138,7 @@
 								href='javascript::'
 								ng-repeat='pageIndex in pageCtrl.pagesList'
 								ng-click ='pageCtrl.setCurrentPage(pageIndex)'
+								ng-class='{"active": pageIndex == pageCtrl.currentPage}'
 								
 								>
 									<span>	
@@ -144,6 +165,7 @@
 							<td>likes</td>
 							<td>reposts</td>
 							<td>comments</td>
+							
 						</tr>
 						<tr 
 						ng-repeat='item in pageCtrl.response | limitTo:pageCtrl.itemsPerPage:(pageCtrl.currentPage-1)*pageCtrl.itemsPerPage'
@@ -171,6 +193,7 @@
 							<td>
 								{{item.comments}}
 							</td>
+							
 						</tr>
 					</table>
 					<nav>
@@ -179,7 +202,8 @@
 								<a 
 									href='javascript::'
 									aria-label="Previous"
-									ng-click='pageCtrl.setCurrentPage(pageCtrl.currentPage - 1)'>
+									ng-click='pageCtrl.setCurrentPage(pageCtrl.currentPage - 1)'
+									>
 							    	<span aria-hidden="true">&laquo;</span>
 							    </a>
 							</li>

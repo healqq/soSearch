@@ -24,7 +24,8 @@ $q = $_GET['q'];
 $reply = $cb->search_tweets(
 	[
 		'q' => $q." -filter:retweets",
-		'count' => 100
+		'count' => 100,
+		'result_type' => 'popular'
 	]
 	, true
 );
