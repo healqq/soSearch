@@ -107,6 +107,7 @@
 			vm.pagesCount = Math.floor(vm.response.length/ vm.itemsPerPage) 
 					+ ( (vm.response.length % vm.itemsPerPage == 0) ? 0:1);
 			vm.pagesList = createPagesArray(vm.pagesCount);
+			vm.response = $filter('orderBy')(vm.response, 'likes', false);
 		}
 		function toggleSelection(index){
 			vm.transpositions[index].selected = ! vm.transpositions[index].selected;
